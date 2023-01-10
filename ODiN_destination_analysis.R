@@ -2,7 +2,7 @@ library(readr)
 library(dplyr)
 library(this.path)
 setwd(this.dir())
-source('utils.R')
+source('src/utils_od_proportions.R')
 
 setwd(this.dir())
 setwd('../DHZW_assign-travel-behaviours/data/processed')
@@ -27,9 +27,9 @@ df_shopping <- df_DHZW_trips[df_DHZW_trips$disp_activity == 'shopping',]
 df_sport <- df_DHZW_trips[df_DHZW_trips$disp_activity == 'sports/hobby',]
 df_work <- df_DHZW_trips[df_DHZW_trips$disp_activity == 'to work',]
 
-df_shopping <- calculate_od_proportions(df_shopping)
-df_sport <- calculate_od_proportions(df_sport)
-df_work <- calculate_od_proportions(df_work)
+df_shopping <- calculate_od_proportions(df_shopping, DHZW_PC4_codes)
+df_sport <- calculate_od_proportions(df_sport, DHZW_PC4_codes)
+df_work <- calculate_od_proportions(df_work, DHZW_PC4_codes)
 
 # save
 setwd(this.dir())
