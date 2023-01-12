@@ -1,6 +1,5 @@
 
-
-## Location assignment to activities of the synthetic population
+# Location assignment to activities of the synthetic population
 
 #### _Author: Marco Pellegrino, Utrecht University_
 
