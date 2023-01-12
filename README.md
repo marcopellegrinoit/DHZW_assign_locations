@@ -1,5 +1,5 @@
 
-## DHZW_assign_locations
+## Location assignment to activities of the synthetic population
 
 #### _Author: Marco Pellegrino, Utrecht University_
 
