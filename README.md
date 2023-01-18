@@ -65,4 +65,4 @@ Procedure:
 
 Procedure:
 - Consider only the schools in DHZW;
-- For each activity of type "school", assign the closest school to the home coordinates of the synthetic agent.
+- For each activity of type "school", assign the closest school to the home coordinates of the synthetic agent. Schools can be of type: daycare, primary and highschool. Synthetic agents to an appropriate type of school based on their age.
