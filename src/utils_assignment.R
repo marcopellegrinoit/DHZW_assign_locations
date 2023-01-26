@@ -35,10 +35,10 @@ assign_locations_PC4_proportions <- function (df_activities, activity_type, df_p
   
   for (PC4 in unique(df_activities[df_activities$activity_type == activity_type, ]$PC4_activity)) {
     print(PC4)
-    if (PC4 == 'outside DHZW') {
+    if (PC4 == 'outside_DHZW') {
       df_activities[df_activities$activity_type == activity_type &
-                      df_activities$PC4_activity == 'outside DHZW', ]$lid <-
-        'outside DHZW'
+                      df_activities$PC4_activity == 'outside_DHZW', ]$lid <-
+        'outside_DHZW'
     } else {
       # get locations in such area
       df_locations_PC4 <-

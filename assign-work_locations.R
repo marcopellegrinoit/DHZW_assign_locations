@@ -23,6 +23,10 @@ df_synth_pop <- read.csv('synthetic_population_DHZW_2019.csv')
 df_synth_pop$PC4 = gsub('.{2}$', '', df_synth_pop$PC6)
 df_synth_pop <- df_synth_pop %>%
   select(agent_ID, PC4)
+
+df_activities <- df_activities %>% 
+  select(-one_of("PC4"))
+
 df_activities <- merge(df_activities, df_synth_pop, by = 'agent_ID')
 
 # load work locations
@@ -32,8 +36,8 @@ df_work_locations <- read.csv('work_DHZW.csv')
 
 # Load PC4 vectorial coordinates and compute their centroids
 setwd(this.dir())
-setwd('../DHZW_assign-travel-behaviours/data')
-df_PC4_geometries <- st_read('CBS-PC4-2019')
+setwd('../DHZW_assign-travel-behaviours/data/map')
+df_PC4_geometries <- st_read('CBS-PC4-2019-v2')
 df_PC4_geometries <- st_transform(df_PC4_geometries, "+proj=longlat +datum=WGS84")
 df_PC4_geometries <- df_PC4_geometries[df_PC4_geometries$PC4 %in% unique(df_synth_pop$PC4),]
 df_PC4_geometries <- st_centroid(df_PC4_geometries)
@@ -79,10 +83,10 @@ for (PC4 in unique(df_synth_pop$PC4)) {
 df_synth_pop$work_lid <- NA
 for (PC4 in unique(df_synth_pop[df_synth_pop$is_working == TRUE, ]$PC4_work)) {
   print(PC4)
-  if (PC4 == 'outside DHZW') {
+  if (PC4 == 'outside_DHZW') {
     df_synth_pop[df_synth_pop$is_working == TRUE &
-                   df_synth_pop$PC4_work == 'outside DHZW', ]$work_lid <-
-      'outside DHZW'
+                   df_synth_pop$PC4_work == 'outside_DHZW', ]$work_lid <-
+      'outside_DHZW'
   } else {
     # get locations in such area
     df_locations_PC4 <-
@@ -134,7 +138,7 @@ df_synth_pop <- df_synth_pop %>%
 
 df_activities <- left_join(df_activities, df_synth_pop, by = 'agent_ID')
 df_activities[df_activities$activity_type == 'work',]$lid <- df_activities[df_activities$activity_type == 'work',]$work_lid
-df_activities <- subset(df_activities, select=-c(work_lid))
+df_activities <- subset(df_activities, select=-c(work_lid, PC4))
  
 ################################################################################
 # save

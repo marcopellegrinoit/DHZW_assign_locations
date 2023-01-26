@@ -3,7 +3,7 @@ library(purrr)
 
 calculate_od_proportions <- function(df_trips, DHZW_PC4_codes) {
   df_od <- data.frame(matrix(ncol = (length(DHZW_PC4_codes)+2), nrow = length(DHZW_PC4_codes)))
-  colnames(df_od) <- c('hh_PC4' , 'outside DHZW', DHZW_PC4_codes)
+  colnames(df_od) <- c('hh_PC4' , 'outside_DHZW', DHZW_PC4_codes)
   df_od[is.na(df_od)] <- 0
   df_od$hh_PC4 <- DHZW_PC4_codes
   

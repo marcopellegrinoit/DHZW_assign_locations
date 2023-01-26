@@ -11,7 +11,7 @@ source('src/utils_assignment.R')
 # Load PC4 proportion destinations
 setwd(this.dir())
 setwd('data/ODiN_destination_proportions')
-df_shopping_prop <- read.table('ODiN_shopping.csv', check.names=FALSE, sep = ',', header = TRUE)
+df_sport_prop <- read.table('ODiN_sport.csv', check.names=FALSE, sep = ',', header = TRUE)
 
 # load synthetic population activity schedule
 setwd(this.dir())
@@ -27,15 +27,15 @@ df_synth_pop <- df_synth_pop %>%
   select(agent_ID, PC4)
 df_activities <- merge(df_activities, df_synth_pop, by = 'agent_ID')
 
-# load shopping locations
+# load sport locations
 setwd(this.dir())
-setwd('../DHZW_locations/location_folders/shopping/data')
-df_shopping_locations <- read.csv('shopping_DHZW.csv')
+setwd('../DHZW_locations/location_folders/sport/data')
+df_sport_locations <- read.csv('sport_DHZW.csv')
 
 # Load PC4 vectorial coordinates and compute their centroids
 setwd(this.dir())
-setwd('../DHZW_assign-travel-behaviours/data')
-df_PC4_geometries <- st_read('CBS-PC4-2019')
+setwd('../DHZW_assign-travel-behaviours/data/map')
+df_PC4_geometries <- st_read('CBS-PC4-2019-v2')
 df_PC4_geometries <- st_transform(df_PC4_geometries, "+proj=longlat +datum=WGS84")
 df_PC4_geometries <- df_PC4_geometries[df_PC4_geometries$PC4 %in% unique(df_synth_pop$PC4),]
 df_PC4_geometries <- st_centroid(df_PC4_geometries)
@@ -44,10 +44,11 @@ df_PC4_geometries = subset(df_PC4_geometries, select = c('PC4'))
 ################################################################################
 # Call function that assigns locations based on the PC4 proportions
 
-df_activities <- assign_locations_PC4_proportions (df_activities, 'shopping', df_shopping_prop, df_synth_pop, df_shopping_locations, df_PC4_geometries)
+df_activities <- assign_locations_PC4_proportions (df_activities, 'sport', df_sport_prop, df_synth_pop, df_sport_locations, df_PC4_geometries)
 
 ################################################################################
 # save
 setwd(this.dir())
 setwd('data/')
 write.csv(df_activities, 'df_synthetic_activities.csv', row.names = FALSE)
+
