@@ -52,7 +52,7 @@ DHZW_PC4_codes <-
 df_activities <- assign_locations_PC4_proportions(df_activities, 'shopping', df_shopping_prop, df_synth_pop, df_shopping_locations, df_PC4_geometries, DHZW_PC4_codes)
 
 # check
-nrow(df_activities[df_activities$activity_type=='shopping' & is.na(df_activities$PC4_activity),])
+nrow(df_activities[df_activities$activity_type=='shopping' & is.na(df_activities$lid),])
 
 # save
 setwd(this.dir())
