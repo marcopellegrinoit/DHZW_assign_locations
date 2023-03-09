@@ -22,9 +22,9 @@ df_activities <- read.csv('df_synthetic_activities.csv')
 setwd(this.dir())
 setwd('../DHZW_synthetic-population/output/synthetic-population-households/4_car_2022-12-26_15-50/')
 df_synth_pop <- read.csv('synthetic_population_DHZW_2019.csv')
-df_synth_pop$PC4 = gsub('.{2}$', '', df_synth_pop$PC6)
+df_synth_pop$hh_PC4 = gsub('.{2}$', '', df_synth_pop$PC6)
 df_synth_pop <- df_synth_pop %>%
-  select(agent_ID, PC4)
+  select(agent_ID, hh_PC4)
 df_activities <- merge(df_activities, df_synth_pop, by = 'agent_ID')
 
 # load shopping locations
@@ -34,19 +34,26 @@ df_shopping_locations <- read.csv('shopping_DHZW.csv')
 
 # Load PC4 vectorial coordinates and compute their centroids
 setwd(this.dir())
-setwd('../DHZW_assign-travel-behaviours/data/map')
+setwd('../DHZW_assign-activities/data/map')
 df_PC4_geometries <- st_read('CBS-PC4-2019-v2')
 df_PC4_geometries <- st_transform(df_PC4_geometries, "+proj=longlat +datum=WGS84")
-df_PC4_geometries <- df_PC4_geometries[df_PC4_geometries$PC4 %in% unique(df_synth_pop$PC4),]
+df_PC4_geometries <- df_PC4_geometries[df_PC4_geometries$PC4 %in% unique(df_synth_pop$hh_PC4),]
 df_PC4_geometries <- st_centroid(df_PC4_geometries)
 df_PC4_geometries = subset(df_PC4_geometries, select = c('PC4'))
 
-################################################################################
-# Call function that assigns locations based on the PC4 proportions
+setwd(this.path::this.dir())
+setwd('data/codes')
+DHZW_PC4_codes <-
+  read.csv("DHZW_PC4_codes.csv", sep = ";" , header = F)$V1
 
-df_activities <- assign_locations_PC4_proportions (df_activities, 'shopping', df_shopping_prop, df_synth_pop, df_shopping_locations, df_PC4_geometries)
-
 ################################################################################
+# Call function that assigns locations based on the PC4 proportions. For locations in DHZW, the lid contains the locations ID. Otherwise the PC4.
+
+df_activities <- assign_locations_PC4_proportions(df_activities, 'shopping', df_shopping_prop, df_synth_pop, df_shopping_locations, df_PC4_geometries, DHZW_PC4_codes)
+
+# check
+nrow(df_activities[df_activities$activity_type=='shopping' & is.na(df_activities$PC4_activity),])
+
 # save
 setwd(this.dir())
 setwd('data/')

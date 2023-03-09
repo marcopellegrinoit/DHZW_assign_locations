@@ -5,14 +5,14 @@ library(tidyr)
 library(readr)
 library("this.path")
 setwd(this.path::this.dir())
-source('../DHZW_assign-travel-behaviours/src/utils.R')
+source('../DHZW_assign-activities/src/utils.R')
 
 ################################################################################
 # This script put together the various years of ODiN into a big collection
 
 # Load ODiNs and OViNs
 setwd(this.path::this.dir())
-setwd('../DHZW_assign-travel-behaviours/data/OViN and OViN')
+setwd('../DHZW_assign-activities/data/OViN and OViN')
 
 OViN2010 <- read_sav("OViN2010.sav")
 OViN2011 <- read_sav("OViN2011.sav")
@@ -73,7 +73,7 @@ DHZW_PC4_codes <-
   read.csv("DHZW_PC4_codes.csv", sep = ";" , header = F)$V1
 df <- df[df$hh_PC4 %in% DHZW_PC4_codes,]
 
-# For individuals with at least a displacement, filter only the ones that start the  day from one. This is because in the simulation the delibration cycle is at midnight everyday, so the agetns must then start from home everyday.
+# For individuals with at least a displacement, filter only the ones that start the  day from home This is because in the simulation the delibration cycle is at midnight everyday, so the agetns must then start from home everyday.
 df <- filter_start_day_from_home(df)
 
 # format the values of the attributes
@@ -101,13 +101,37 @@ df <-
 # Data cleaning
 
 df <- df %>%
-  select(agent_ID, hh_PC4, disp_start_PC4, disp_arrival_PC4, disp_activity, day_of_week)
+  select(agent_ID, hh_PC4, disp_start_PC4, disp_arrival_PC4, disp_activity, day_of_week, age)
 
-df[!(df$disp_start_PC4 %in% DHZW_PC4_codes),]$disp_start_PC4 <- 'outside_DHZW'
-df[!(df$disp_arrival_PC4 %in% DHZW_PC4_codes),]$disp_arrival_PC4 <- 'outside_DHZW'
+# Flag PC4s that are outside of DHZW
+df$start_in_DHZW <- 1
+df$arrive_in_DHZW <- 1
 
-unique(df$disp_start_PC4)
-unique(df$disp_arrival_PC4)
+df[!(df$disp_start_PC4 %in% DHZW_PC4_codes),]$start_in_DHZW <- 0
+df[!(df$disp_arrival_PC4 %in% DHZW_PC4_codes),]$arrive_in_DHZW <- 0
+
+# remove trips completely outside of DHZW
+df <- df[df$start_in_DHZW==1 | df$arrive_in_DHZW==1,]
+
+# remove trips with unkown PC4
+df <- df[df$disp_start_PC4 != '0000' & df$disp_start_PC4 != '0',]
+df <- df[df$disp_arrival_PC4 != '0000' & df$disp_arrival_PC4 != '0',]
+
+# Filter activity types of the simulation
+df <- df %>%
+  filter(disp_activity == 'shopping' |
+           disp_activity == 'to work' |
+           disp_activity == 'sports/hobby' |
+           disp_activity == 'follow education')
+
+df$age_school <- NA
+df[df$age <= 5,]$age_school <- 'daycare'
+df[df$age >= 6 & df$age <= 11,]$age_school <- 'primary_school'
+df[df$age >= 12 & df$age <= 18,]$age_school <- 'highschool'
+df[df$age >= 19,]$age_school <- 'university'
+
+sort(unique(df$disp_start_PC4))
+sort(unique(df$disp_arrival_PC4))
 unique(df$hh_PC4)
 unique(df$disp_activity)
 unique(df$day_of_week)

@@ -8,7 +8,7 @@ library(this.path)
 
 # load synthetic population activity schedule
 setwd(this.dir())
-setwd('../DHZW_assign-travel-behaviours/data/processed/')
+setwd('../DHZW_assign-activities/data/processed/')
 df_activities <- read.csv('df_synthetic_activities.csv')
 
 # load synthetic population
@@ -19,7 +19,7 @@ df_synth_pop <- read.csv('synthetic_population_DHZW_2019.csv')
 # load home locations
 setwd(this.dir())
 setwd('../DHZW_locations/location_folders/home/data/')
-df_homes <- read.csv('df_households_locations.csv')
+df_homes <- read.csv('df_households_minimal.csv')
 df_homes <- df_homes %>%
   select(hh_ID, lid)
 
@@ -31,7 +31,10 @@ df_synth_pop <- df_synth_pop %>%
 
 df_activities <- merge(df_activities, df_synth_pop, by = 'agent_ID')
 df_activities <- merge(df_activities, df_homes, by = 'hh_ID')
-df_activities[df_activities$activity_type != 'home',]$lid = NA
+
+df_activities$in_DHZW = NA
+df_activities[df_activities$activity_type == 'home',]$in_DHZW = 1
+df_activities[!(df_activities$activity_type == 'home'),]$lid = NA
 
 # save 
 setwd(this.dir())

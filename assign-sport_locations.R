@@ -34,17 +34,25 @@ df_sport_locations <- read.csv('sport_DHZW.csv')
 
 # Load PC4 vectorial coordinates and compute their centroids
 setwd(this.dir())
-setwd('../DHZW_assign-travel-behaviours/data/map')
+setwd('../DHZW_assign-activities/data/map')
 df_PC4_geometries <- st_read('CBS-PC4-2019-v2')
 df_PC4_geometries <- st_transform(df_PC4_geometries, "+proj=longlat +datum=WGS84")
 df_PC4_geometries <- df_PC4_geometries[df_PC4_geometries$PC4 %in% unique(df_synth_pop$PC4),]
 df_PC4_geometries <- st_centroid(df_PC4_geometries)
 df_PC4_geometries = subset(df_PC4_geometries, select = c('PC4'))
 
+setwd(this.path::this.dir())
+setwd('data/codes')
+DHZW_PC4_codes <-
+  read.csv("DHZW_PC4_codes.csv", sep = ";" , header = F)$V1
+
 ################################################################################
 # Call function that assigns locations based on the PC4 proportions
 
-df_activities <- assign_locations_PC4_proportions (df_activities, 'sport', df_sport_prop, df_synth_pop, df_sport_locations, df_PC4_geometries)
+df_activities <- assign_locations_PC4_proportions(df_activities, 'sport', df_sport_prop, df_synth_pop, df_sport_locations, df_PC4_geometries, DHZW_PC4_codes)
+
+# check
+nrow(df_activities[df_activities$activity_type=='sport' & is.na(df_activities$lid),])
 
 ################################################################################
 # save

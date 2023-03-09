@@ -3,20 +3,20 @@ library(dplyr)
 library(this.path)
 library(sf)
 
-assign_locations_PC4_proportions <- function (df_activities, activity_type, df_prop, df_synth_pop, df_locations, df_PC4_geometries) {
+assign_locations_PC4_proportions <- function (df_activities, activity_type, df_prop, df_synth_pop, df_locations, df_PC4_geometries, DHZW_PC4_codes) {
   
   # Assign PC4 locations based on proportions of where people go in ODiN
   
   df_activities$PC4_activity <- NA
-  for (PC4 in unique(df_synth_pop$PC4)) {
-    print(PC4)
+  for (hh_PC4 in unique(df_synth_pop$hh_PC4)) {
+    print(hh_PC4)
     
     # get activities of people that live in such PC4
-    PC4_agent_IDs <- df_synth_pop[df_synth_pop$PC4 == PC4, ]$agent_ID
+    PC4_agent_IDs <- df_synth_pop[df_synth_pop$hh_PC4 == hh_PC4, ]$agent_ID
     #  df_activities_PC4 <- df_activities[df_activities$agent_ID %in% PC4_agent_IDs,]
     
     df_prop_PC4 <-
-      df_prop[df_prop$hh_PC4 == PC4, ]
+      df_prop[df_prop$hh_PC4 == hh_PC4, ]
     
     df_activities[df_activities$agent_ID %in% PC4_agent_IDs &
                     df_activities$activity_type == activity_type, ] <-
@@ -34,12 +34,8 @@ assign_locations_PC4_proportions <- function (df_activities, activity_type, df_p
   # For each PC4 pick a random location in it. If there are no locations in such area, look into the closest PC4
   
   for (PC4 in unique(df_activities[df_activities$activity_type == activity_type, ]$PC4_activity)) {
-    print(PC4)
-    if (PC4 == 'outside_DHZW') {
-      df_activities[df_activities$activity_type == activity_type &
-                      df_activities$PC4_activity == 'outside_DHZW', ]$lid <-
-        'outside_DHZW'
-    } else {
+    if (PC4 %in% DHZW_PC4_codes) {
+      print(PC4)
       # get locations in such area
       df_locations_PC4 <-
         df_locations[df_locations$PC4 == PC4, ]
@@ -76,11 +72,17 @@ assign_locations_PC4_proportions <- function (df_activities, activity_type, df_p
           size = nrow(df_activities[df_activities$activity_type == activity_type &
                                       df_activities$PC4_activity == original_PC4, ])
         )
-      
-    }
+      df_activities[df_activities$activity_type == activity_type &
+                      df_activities$PC4_activity == original_PC4, ]$in_DHZW <- 1
+    } else {
+      df_activities[df_activities$activity_type == activity_type &
+                      df_activities$PC4_activity == PC4, ]$lid <- PC4
+      df_activities[df_activities$activity_type == activity_type &
+                      df_activities$PC4_activity == PC4, ]$in_DHZW <- 0
+      }
   }
   
-  df_activities = subset(df_activities, select = -c(PC4, PC4_activity))
+  df_activities = subset(df_activities, select = -c(hh_PC4, PC4_activity))
   
   return(df_activities)
 }

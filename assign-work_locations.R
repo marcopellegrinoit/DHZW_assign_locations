@@ -36,7 +36,7 @@ df_work_locations <- read.csv('work_DHZW.csv')
 
 # Load PC4 vectorial coordinates and compute their centroids
 setwd(this.dir())
-setwd('../DHZW_assign-travel-behaviours/data/map')
+setwd('../DHZW_assign-activities/data/map')
 df_PC4_geometries <- st_read('CBS-PC4-2019-v2')
 df_PC4_geometries <- st_transform(df_PC4_geometries, "+proj=longlat +datum=WGS84")
 df_PC4_geometries <- df_PC4_geometries[df_PC4_geometries$PC4 %in% unique(df_synth_pop$PC4),]
@@ -77,17 +77,22 @@ for (PC4 in unique(df_synth_pop$PC4)) {
     ))
 }
 
+# Mark if the work is in DHZW. If so, in the next step we look for the closest real schools
+setwd(this.path::this.dir())
+setwd('data/codes')
+DHZW_PC4_codes <-
+  read.csv("DHZW_PC4_codes.csv", sep = ";" , header = F)$V1
+df_synth_pop$work_in_DHZW <- NA
+df_synth_pop[df_synth_pop$is_working==TRUE,]$work_in_DHZW <- 0
+df_synth_pop[df_synth_pop$is_working==TRUE & df_synth_pop$PC4_work %in% DHZW_PC4_codes,]$work_in_DHZW <- 1
+
 ################################################################################
-# add the work location inside each PC4, based on income and education level (?)
+# add the work location inside each PC4
 
 df_synth_pop$work_lid <- NA
 for (PC4 in unique(df_synth_pop[df_synth_pop$is_working == TRUE, ]$PC4_work)) {
   print(PC4)
-  if (PC4 == 'outside_DHZW') {
-    df_synth_pop[df_synth_pop$is_working == TRUE &
-                   df_synth_pop$PC4_work == 'outside_DHZW', ]$work_lid <-
-      'outside_DHZW'
-  } else {
+  if ((PC4 %in% DHZW_PC4_codes)) {
     # get locations in such area
     df_locations_PC4 <-
       df_work_locations[df_work_locations$PC4 == PC4, ]
@@ -128,19 +133,25 @@ for (PC4 in unique(df_synth_pop[df_synth_pop$is_working == TRUE, ]$PC4_work)) {
   }
 }
 
+df_synth_pop <- df_synth_pop %>%
+  filter(is_working == TRUE) %>%
+  select(agent_ID, work_lid, PC4_work, work_in_DHZW)
+df_synth_pop[df_synth_pop$work_in_DHZW==0,]$work_lid <- df_synth_pop[df_synth_pop$work_in_DHZW==0,]$PC4_work
+df_synth_pop = subset(df_synth_pop, select = -c(PC4_work))
 
 ################################################################################
 # assign the work location from the population dataframe to the activity dataframe
 
-df_synth_pop <- df_synth_pop %>%
-  filter(is_working == TRUE) %>%
-  select(agent_ID, work_lid)
-
 df_activities <- left_join(df_activities, df_synth_pop, by = 'agent_ID')
 df_activities[df_activities$activity_type == 'work',]$lid <- df_activities[df_activities$activity_type == 'work',]$work_lid
-df_activities <- subset(df_activities, select=-c(work_lid, PC4))
- 
+df_activities[df_activities$activity_type == 'work',]$in_DHZW <- df_activities[df_activities$activity_type == 'work',]$work_in_DHZW
+
+df_activities <- subset(df_activities, select=-c(work_lid, work_in_DHZW, PC4))
+
 ################################################################################
+# check
+nrow(df_activities[df_activities$activity_type=='work' & is.na(df_activities$lid),])
+
 # save
 
 setwd(this.dir())
