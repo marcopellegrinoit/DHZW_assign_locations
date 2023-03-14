@@ -24,24 +24,17 @@ df_synth_pop$PC4 = gsub('.{2}$', '', df_synth_pop$PC6)
 df_synth_pop <- df_synth_pop %>%
   select(agent_ID, PC4)
 
-df_activities <- df_activities %>% 
-  select(-one_of("PC4"))
-
 df_activities <- merge(df_activities, df_synth_pop, by = 'agent_ID')
 
 # load work locations
 setwd(this.dir())
-setwd('../DHZW_locations/location_folders/work/data')
+setwd('../DHZW_locations/data/output')
 df_work_locations <- read.csv('work_DHZW.csv')
 
 # Load PC4 vectorial coordinates and compute their centroids
 setwd(this.dir())
-setwd('../DHZW_assign-activities/data/map')
-df_PC4_geometries <- st_read('CBS-PC4-2019-v2')
-df_PC4_geometries <- st_transform(df_PC4_geometries, "+proj=longlat +datum=WGS84")
-df_PC4_geometries <- df_PC4_geometries[df_PC4_geometries$PC4 %in% unique(df_synth_pop$PC4),]
-df_PC4_geometries <- st_centroid(df_PC4_geometries)
-df_PC4_geometries = subset(df_PC4_geometries, select = c('PC4'))
+setwd('../DHZW_shapefiles/data/processed/shapefiles')
+df_PC4 <- st_read('centroids_PC4_DHZW_shp')
 
 ################################################################################
 # add a flag to the synthetic agents that have at least one work activity
@@ -79,7 +72,7 @@ for (PC4 in unique(df_synth_pop$PC4)) {
 
 # Mark if the work is in DHZW. If so, in the next step we look for the closest real schools
 setwd(this.path::this.dir())
-setwd('data/codes')
+setwd('../DHZW_shapefiles/data/codes')
 DHZW_PC4_codes <-
   read.csv("DHZW_PC4_codes.csv", sep = ";" , header = F)$V1
 df_synth_pop$work_in_DHZW <- NA
@@ -102,18 +95,18 @@ for (PC4 in unique(df_synth_pop[df_synth_pop$is_working == TRUE, ]$PC4_work)) {
       PC4 # save the original PC4 in which the location would be. We needed it later to assign to such rows the random location
     list_PC4_tried <- c() # list of PC4 tried
     PC4_point <-
-      df_PC4_geometries[df_PC4_geometries$PC4 == original_PC4, ]  # centroid of the original PC4
+      df_PC4[df_PC4$PC4 == original_PC4, ]  # centroid of the original PC4
     while (nrow(df_locations_PC4) == 0) {
       #if there are no locations in the searched PC4, look into the next closest one
       list_PC4_tried <-
         append(list_PC4_tried, PC4) # add the just searched PC4
       print(paste(PC4, nrow(df_locations_PC4)), sep = ' ')
-      df_PC4_geometries$distance <-
-        as.numeric(st_distance(df_PC4_geometries, PC4_point)) # calculate the distance to all the PC4
-      df_PC4_geometries[df_PC4_geometries$PC4 %in% list_PC4_tried, ]$distance <-
+      df_PC4$distance <-
+        as.numeric(st_distance(df_PC4, PC4_point)) # calculate the distance to all the PC4
+      df_PC4[df_PC4$PC4 %in% list_PC4_tried, ]$distance <-
         NA # eliminate the subject PC4 and the tried ones
       PC4 <-
-        df_PC4_geometries[which.min(df_PC4_geometries$distance), ]$PC4  # extract the next closest PC4
+        df_PC4[which.min(df_PC4$distance), ]$PC4  # extract the next closest PC4
       df_locations_PC4 <-
         df_work_locations[df_work_locations$PC4 == PC4, ]  # retrieve locations in the new PC4
     }
@@ -153,7 +146,6 @@ df_activities <- subset(df_activities, select=-c(work_lid, work_in_DHZW, PC4))
 nrow(df_activities[df_activities$activity_type=='work' & is.na(df_activities$lid),])
 
 # save
-
 setwd(this.dir())
 setwd('data/')
 write.csv(df_activities, 'df_synthetic_activities.csv', row.names = FALSE)

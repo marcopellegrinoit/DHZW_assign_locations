@@ -29,20 +29,16 @@ df_activities <- merge(df_activities, df_synth_pop, by = 'agent_ID')
 
 # load sport locations
 setwd(this.dir())
-setwd('../DHZW_locations/location_folders/sport/data')
+setwd('../DHZW_locations/data/output')
 df_sport_locations <- read.csv('sport_DHZW.csv')
 
 # Load PC4 vectorial coordinates and compute their centroids
 setwd(this.dir())
-setwd('../DHZW_assign-activities/data/map')
-df_PC4_geometries <- st_read('CBS-PC4-2019-v2')
-df_PC4_geometries <- st_transform(df_PC4_geometries, "+proj=longlat +datum=WGS84")
-df_PC4_geometries <- df_PC4_geometries[df_PC4_geometries$PC4 %in% unique(df_synth_pop$hh_PC4),]
-df_PC4_geometries <- st_centroid(df_PC4_geometries)
-df_PC4_geometries = subset(df_PC4_geometries, select = c('PC4'))
+setwd('../DHZW_shapefiles/data/processed/shapefiles')
+df_PC4_geometries <- st_read('centroids_PC4_DHZW_shp')
 
 setwd(this.path::this.dir())
-setwd('data/codes')
+setwd('../DHZW_shapefiles/data/codes')
 DHZW_PC4_codes <-
   read.csv("DHZW_PC4_codes.csv", sep = ";" , header = F)$V1
 

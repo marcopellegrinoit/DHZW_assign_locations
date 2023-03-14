@@ -18,7 +18,7 @@ df_synth_pop <- read.csv('synthetic_population_DHZW_2019.csv')
 
 # load home locations
 setwd(this.dir())
-setwd('../DHZW_locations/location_folders/home/data/')
+setwd('../DHZW_locations/data/output')
 df_homes <- read.csv('df_households_minimal.csv')
 df_homes <- df_homes %>%
   select(hh_ID, lid)

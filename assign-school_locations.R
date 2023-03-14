@@ -20,17 +20,13 @@ df_synth_pop <- read.csv('synthetic_population_DHZW_2019.csv')
 
 # load school buildings
 setwd(this.dir())
-setwd('../DHZW_locations/location_folders/schools/data')
-df_school_locations <- st_read('schools_DHZW')
+setwd('../DHZW_locations/data/output')
+df_school_locations <- read.csv('school_DHZW.csv')
 
-# Load PC6 vectorial coordinates and compute their centroids
+# Load PC6 centroids of DHZW
 setwd(this.dir())
-setwd('../DHZW_synthetic-population/data/shapefiles/raw')
-df_PC6_geometries <- st_read('CBS-PC6-2019-v2')
-df_PC6_geometries <- df_PC6_geometries[df_PC6_geometries$PC6 %in% unique(df_synth_pop$PC6),]
-df_PC6_geometries <- st_transform(df_PC6_geometries, "+proj=longlat +datum=WGS84")
-df_PC6_geometries <- st_centroid(df_PC6_geometries)
-df_PC6_geometries = subset(df_PC6_geometries, select = c('PC6'))
+setwd('../DHZW_shapefiles/data/processed/csv')
+df_PC6_DHZW <- read.csv('centroids_PC6_DHZW.csv')
 
 ################################################################################
 # mark if the agent has at least one school activity
@@ -120,7 +116,7 @@ for (PC4 in unique(df_synth_pop$PC4)) {
 
 # Mark if the school is in DHZW. If so, in the next step we look for the closest real schools
 setwd(this.path::this.dir())
-setwd('data/codes')
+setwd('../DHZW_shapefiles/data/codes')
 DHZW_PC4_codes <-
   read.csv("DHZW_PC4_codes.csv", sep = ";" , header = F)$V1
 
@@ -129,14 +125,10 @@ df_synth_pop[df_synth_pop$PC4_school %in% DHZW_PC4_codes,]$school_in_DHZW <- 1
 
 ################################################################################
 # Assign to each individual its home point
-df_coordinates <- data.frame(st_coordinates(df_PC6_geometries$geometry))
-colnames(df_coordinates) <- c('longitude', 'latitude')
-df_PC6_geometries = cbind(df_PC6_geometries, df_coordinates)
-df_PC6_geometries <- data.frame(df_PC6_geometries)
 
-df_synth_pop <- merge(df_synth_pop, df_PC6_geometries, by='PC6')
+df_synth_pop <- merge(df_synth_pop, df_PC6_DHZW, by='PC6')
 df_synth_pop <- df_synth_pop %>%
-  dplyr::select(agent_ID, age_school, PC4_school, school_in_DHZW, longitude, latitude)
+  dplyr::select(agent_ID, age_school, PC4_school, school_in_DHZW, coordinate_y, coordinate_x)
 
 ################################################################################
 # Assign to each individuals its closest school based on the age
@@ -144,9 +136,10 @@ df_synth_pop <- df_synth_pop %>%
 # function to retrieve the closest school for one agent
 get_closest_school <- function(df){
   df_schools <- df_school_locations[df_school_locations$category == df$age_school,]
-  dt <- data.table((df_schools$longitude-df$longitude)^2+(df_schools$latitude-df$latitude)^2)
+  dt <- data.table((df_schools$coordinate_y-df$coordinate_y)^2+(df_schools$coordinate_x-df$coordinate_x)^2)
   dt <- cbind(dt, df_schools)
-  return(dt[which.min(dt$V1)]$lid)}
+  return(dt[which.min(dt$V1)]$lid)
+}
 
 # daycare
 df_synth_pop_daycare <- df_synth_pop[df_synth_pop$age_school=='daycare' & df_synth_pop$school_in_DHZW == 1,]

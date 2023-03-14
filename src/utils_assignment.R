@@ -4,12 +4,6 @@ library(this.path)
 library(sf)
 
 assign_locations_PC4_proportions <- function (df_activities, activity_type, df_prop, df_synth_pop, df_locations, df_PC4_geometries, DHZW_PC4_codes) {
-  
-  activity_type <- 'sport'
-  df_locations <- df_sport_locations
-  df_prop <- df_sport_prop
-  # Assign PC4 locations based on proportions of where people go in ODiN
-  
   df_activities$PC4_activity <- NA
   for (hh_PC4 in unique(df_synth_pop$hh_PC4)) {
     print(hh_PC4)
