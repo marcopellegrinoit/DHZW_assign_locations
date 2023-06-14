@@ -10,12 +10,12 @@ source('src/utils_assignment.R')
 
 # Load PC4 proportion destinations
 setwd(this.dir())
-setwd('data/ODiN_destination_proportions')
+setwd('data/processed')
 df_shopping_prop <- read.table('ODiN_shopping.csv', check.names=FALSE, sep = ',', header = TRUE)
 
 # load synthetic population activity schedule
 setwd(this.dir())
-setwd('data/')
+setwd('data/output')
 df_activities <- read.csv('df_synthetic_activities.csv')
 
 # load synthetic population
@@ -52,5 +52,5 @@ nrow(df_activities[df_activities$activity_type=='shopping' & is.na(df_activities
 
 # save
 setwd(this.dir())
-setwd('data/')
+setwd('data/output')
 write.csv(df_activities, 'df_synthetic_activities.csv', row.names = FALSE)

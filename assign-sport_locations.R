@@ -10,7 +10,7 @@ source('src/utils_assignment.R')
 
 # Load PC4 proportion destinations
 setwd(this.dir())
-setwd('data/ODiN_destination_proportions')
+setwd('data/processed')
 df_sport_prop <- read.table('ODiN_sport.csv', check.names=FALSE, sep = ',', header = TRUE)
 
 # load synthetic population activity schedule
@@ -56,5 +56,5 @@ nrow(df_activities[df_activities$activity_type=='school' & is.na(df_activities$l
 ################################################################################
 # save
 setwd(this.dir())
-setwd('data/')
+setwd('data/output')
 write.csv(df_activities, 'df_synthetic_activities.csv', row.names = FALSE)

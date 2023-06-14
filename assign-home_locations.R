@@ -38,5 +38,5 @@ df_activities[!(df_activities$activity_type == 'home'),]$lid = NA
 
 # save 
 setwd(this.dir())
-setwd('data/')
+setwd('data/output')
 write.csv(df_activities, 'df_synthetic_activities.csv', row.names = FALSE)

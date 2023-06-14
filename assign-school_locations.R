@@ -10,7 +10,7 @@ library(data.table)
 
 # load synthetic population activity schedule
 setwd(this.dir())
-setwd('data/')
+setwd('data/output')
 df_activities <- read.csv('df_synthetic_activities.csv')
 
 # load synthetic population
@@ -46,7 +46,7 @@ df_synth_pop[df_synth_pop$age >= 12 & df_synth_pop$age <= 18,]$age_school <- 'hi
 df_synth_pop[df_synth_pop$age >= 19,]$age_school <- 'university'
 
 setwd(this.dir())
-setwd('data/ODiN_destination_proportions')
+setwd('data/processed')
 df_school_prop_daycare <- read.csv('ODiN_school_daycare.csv', check.names=FALSE, sep = ',', header = TRUE)
 df_school_prop_primary <- read.csv('ODiN_school_primary.csv', check.names=FALSE, sep = ',', header = TRUE)
 df_school_prop_highschool <- read.csv('ODiN_school_highschool.csv', check.names=FALSE, sep = ',', header = TRUE)
@@ -188,5 +188,5 @@ nrow(df_activities[df_activities$activity_type=='school' & is.na(df_activities$l
 
 # save
 setwd(this.dir())
-setwd('data/')
+setwd('data/output')
 write.csv(df_activities, 'df_synthetic_activities.csv', row.names = FALSE)

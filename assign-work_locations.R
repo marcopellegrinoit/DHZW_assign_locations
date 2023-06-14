@@ -8,7 +8,7 @@ library(sf)
 
 # Load PC4 proportion destinations
 setwd(this.dir())
-setwd('data/ODiN_destination_proportions')
+setwd('data/processed')
 df_work_prop <- read.table('ODiN_work.csv', check.names=FALSE, sep = ',', header = TRUE)
 
 # load synthetic population activity schedule
@@ -147,5 +147,5 @@ nrow(df_activities[df_activities$activity_type=='work' & is.na(df_activities$lid
 
 # save
 setwd(this.dir())
-setwd('data/')
+setwd('data/output')
 write.csv(df_activities, 'df_synthetic_activities.csv', row.names = FALSE)
