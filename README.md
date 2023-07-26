@@ -60,7 +60,7 @@ However, the school buildings for activities within DHZW are assigned based on t
 
 ## Analysis
 
-Scripts in $$`analysis/`$$ allow the extrapolation of trips from the located activities for comparison with mobility surveys. The tools permit plotting different distributions for the evaluation of distances and postcodes.
+Scripts in [`analysis`](analysis) allow the extrapolation of trips from the located activities for comparison with mobility surveys. The tools permit plotting different distributions for the evaluation of distances and postcodes.
 
 ## Contributors {#contributors}
 
