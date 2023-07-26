@@ -11,7 +11,7 @@
 5.  [Contributors](#contributors)
 6.  [License](#license)
 
-## Description {#description}
+## Description
 
 This repository contains scripts to assign locations to the activities of a synthetic population. The code is specific for a case-study project on The Hague Zuid West. This project was undertaken at Utrecht University, The Netherlands, during 2022-2023 by Marco Pellegrino and a team of contributors.
 
@@ -62,7 +62,7 @@ However, the school buildings for activities within DHZW are assigned based on t
 
 Scripts in [`analysis`](analysis) allow the extrapolation of trips from the located activities for comparison with mobility surveys. The tools permit plotting different distributions for the evaluation of distances and postcodes.
 
-## Contributors {#contributors}
+## Contributors
 
 This project was made possible thanks to the hard work and contributions from:
 
@@ -74,6 +74,6 @@ This project was made possible thanks to the hard work and contributions from:
 -   Brian Logan
 -   Judith A. Verstegen
 
-## License {#license}
+## License
 
 This repository is licensed under the GNU General Public License v3.0 (GPL-3.0). For more details, see the [LICENSE](LICENSE) file.
