@@ -1,69 +1,79 @@
+![GitHub](https://img.shields.io/badge/license-GPL--3.0-blue)
 
 # Location assignment to activities of the synthetic population
 
-#### _Author: Marco Pellegrino, Utrecht University_
+## Table of Contents
 
-#### _April 2022 - July 2023_
+1.  [Description](#description)
+2.  [Data preparation](#1)\-data-preparation)
+3.  [Location assignment](2)\-location-assignment)
+4.  [Analysis](analysis)
+5.  [Contributors](#contributors)
+6.  [License](#license)
 
 ## Description
 
-This repository contains scripts to assign locations to the activities of a synthetic population. The code is specific for a case-study project on The Hague Zuid West.
+This repository contains scripts to assign locations to the activities of a synthetic population. The code is specific for a case-study project on The Hague Zuid West. This project was undertaken at Utrecht University, The Netherlands, during 2022-2023 by Marco Pellegrino and a team of contributors.
 
-## **Generate PC4 statistics about where activities take place in ODiN in DHZW**
-Firstly, reformat ODiN to take into account only the destination information. It is not relevant to clean missing data about attributes not used for this scope (e.g. demographic information).
-[ODiN-data_preparation.R](https://github.com/mr-marco/DHZW_assign_locations/blob/main/ODiN-data_preparation.R)
+Agents in the simulation engage in activities either within the DHZW case study area or outside of it. For activities within the area, specific locations are assigned, while for activities outside the boundary, only postcodes are used to denote the general location.
 
-Secondly, starting from ODiN trips of DHZW inhabitants, statistics about the PC4 destinations are computed ([ODiN-activity_destination_PC4.R](https://github.com/mr-marco/DHZW_assign_locations/blob/main/ODiN-activity_destination_PC4.R)).
-In particular, for each residential PC4 in DHZW, a probability distribution of destination PC4 is calculated. The destination PC4 are all the PC4 codes in DHZW, plus "outside DHZW" that represents all the trips arriving outside the case-study area.
-Probability distributions are divided by trip reason: work, shopping and sport.
+## 1) Data preparation
 
-## **Assign locations to the activities based on the previously computed ODiN statistics**
-	
-### Assign home locations ([assign-home_locations.R](https://github.com/mr-marco/DHZW_assign_locations/blob/main/assign-home_locations.R))
-Input:
- - Synthetic activities;
- - Synthetic households;
- - BAG building addresses dataset.
+Script: [`data_preparation_DHZW`](data_preparation_DHZW.R)  
+To assign locations, statistical analysis is conducted based on ODiN trips made by DHZW residents. The postcode PC4 destinations for each residential PC4 in DHZW are analysed, and the proportions of PC4 destinations are calculated for each destination activity. This information helps determine the spatial distribution of activities. See [data](README_data.md) for the used surveys.
 
-Procedure:
+## 2) Location assignment
 
- -Consider  only the residential BAG buildings in DHZW;
- - From the BAG dataset we know the amount of real addresses per PC6. Each neighbourhood is partitioned in PC6 areas, hence for each PC6 the percentage (proportion) of real addresses over its neighbourhood is computed. With these proportions, synthetic households are assigned to PC6 areas, returning a finer geolocation level than neighbourhoods;
- - For each synthetic household, the centroid of its PC6 is used as coordinates;
- - in the synthetic activities, the location of activities of type "home" is assigned to the home of the corresponding synthetic agent.
+#### Assign home locations
 
-### Assign work locations ([assign-work_locations.R](https://github.com/mr-marco/DHZW_assign_locations/blob/main/assign-work_locations.R "assign-work_locations.R"))
-Input:
- - Synthetic activities;
- - Synthetic agents;
- - BAG building addresses dataset.
+Script: [`assign-home_locations.R`](assign-home_locations.R)
 
-Procedure:
+The agent's household location is already determined within the synthetic population. The script adds such spatial information to all home activities.
 
- - Consider only the office and retail BAG buildings in DHZW;
- - For each residential PC4 of the synthetic agents, compute a probability distribution of PC4 where inhabitants go to work in DHZW, plus an external "outside DHZW" area ([ODiN-activity_destination_PC4.R](https://github.com/mr-marco/DHZW_assign_locations/blob/main/ODiN-activity_destination_PC4.R));
- - Distribute PC4 work areas over synthetic agents that have at least a "work" activity, based on the previous distribution. PC4 work areas are fixed per agents, so that if the agent goes to work more than once in the simulation, the location remains fixed.
- - For each agent, select a random work location existing in the previously generated PC4 work area. Each BAG location already contains precise coordinates.
- 
- ### Assign shopping and sport locations ([assign-shopping_locations.R](https://github.com/mr-marco/DHZW-assign_locations/blob/main/assign-shopping_locations.R "assign-shopping_locations.R"), [assign-sport_locations.R](https://github.com/mr-marco/DHZW_assign_locations/blob/main/assign-sport_locations.R "assign-sport_locations.R"))
- Input:
- - Synthetic activities;
- - Synthetic agents;
- - BAG building addresses dataset.
+#### Assign work locations
 
-Procedure:
+Script: [`assign-work_locations.R`](assign-work_locations.R)
 
- - Consider only the sport and shopping BAG buildings in DHZW;
- - For each residential PC4 of the synthetic agents, compute a probability distribution of PC4 where inhabitants go for shopping and sport in DHZW, plus an external "outside DHZW" area ([ODiN-activity_destination_PC4.R](https://github.com/mr-marco/DHZW_assign_locations/blob/main/ODiN-activity_destination_PC4.R));
- - Distribute PC4 work areas over the synthetic activities based on the previous distribution. PC4 shopping and sport areas are not fixed per agents, so the location can change within activities of the same agent;
- - For each agent, select a random shoppinf and sport location existing in the previously generated PC4 areas. Each BAG location already contains precise coordinates.
+The first step in the process is to select agents from the synthetic population who have at least one work location. From this group, for each PC4 of DHZW, the residents are identified. These residents are then assigned a PC4 work location based on step 1.
 
- ### Assign school locations ([assign-school_locations.R](https://github.com/mr-marco/DHZW_assign_locations/blob/main/assign-school_locations.R "assign-school_locations.R"))
- Input:
- - Synthetic activities;
- - Synthetic agents;
- - [Municipality dataset](https://denhaag.dataplatform.nl/#/data/cc1362f7-d847-4141-9361-d106b3f497ec) about school buildings.
+If the assigned work postcode is within DHZW, a work building within the respective PC4 is randomly chosen and assigned to each agent. However, if there are no available work buildings within the retrieved work postcode from the ODiN distribution, the provided tool is scalable and searches in alternative close postcodes within DHZW based on Euclidean distance.
 
-Procedure:
-- Consider only the schools in DHZW;
-- For each activity of type "school", assign the closest school to the home coordinates of the synthetic agent. Schools can be of type: daycare, primary and high school. Synthetic agents to an appropriate type of school based on their age.
+Finally, all work activities of the agents are associated with their assigned work locations. It is assumed that agents go to work at the same location consistently.
+
+#### Assign shopping and sports locations
+
+Script: [`assign-shopping_locations.R`](assign-shopping_locations.R) and [`assign-sport_locations.R`](assign-sport_locations.R)
+
+The procedure for assigning locations for shopping and sports activities follows the same approach as explained for work activities. However, unlike work activities where agents are assumed to go to the same location, agents' shopping and sports activities are not assumed to take place at the same location throughout the week. Hence, the location assignment is done directly for each activity.
+
+#### Assign school locations
+
+Script: [`assign-school_locations.R`](assign-school_locations.R)  
+The procedure for assigning school locations follows a similar approach as explained for work activities. Agents are assumed to attend school at the same location.
+
+However, the school buildings for activities within DHZW are assigned based on the agents' age as follows:
+
+*   Daycare, for agents younger than 5 years old (inclusive)
+*   Primary school, for agents with age between 6 and 11 (inclusive)
+*   High school, for agents with age between 12 and 18 (inclusive)
+*   University, for agents older than 19 years old (inclusive)
+
+## Analysis
+
+Scripts in \[`analysis/`\] allow the extrapolation of trips from the located activities for comparison with mobility surveys. The tools permit plotting different distributions for the evaluation of distances and postcodes.
+
+## Contributors
+
+This project was made possible thanks to the hard work and contributions from:
+
+*   Marco Pellegrino (Author)
+*   Jan de Mooij
+*   Tabea Sonnenschein
+*   Mehdi Dastani
+*   Dick Ettema
+*   Brian Logan
+*   Judith A. Verstegen
+
+## License
+
+This repository is licensed under the GNU General Public License v3.0 (GPL-3.0). For more details, see the [LICENSE](LICENSE) file.

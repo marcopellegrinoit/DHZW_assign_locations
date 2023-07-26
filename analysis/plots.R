@@ -5,6 +5,8 @@ library(readr)
 library(openxlsx)
 library(tidyr)
 
+setwd(this.dir())
+
 ################################################################################
 # distance analysis per mode
 df_distance_mode <- read.csv('../data/processed/analysis/ODiN/distance_mode.csv')
@@ -58,10 +60,17 @@ df_mode <- read.csv('../data/processed/analysis/ODiN/mode_choice_overall.csv')
 df_mode_sim <- read_csv("../..//DHZW-simulation_Sim-2APL/src/main/resources/distance_analysis/mode_total.csv")
 df_mode_sim$proportion_sim <- df_mode_sim$frequency / sum(df_mode_sim$frequency)
 
+
 # # Create ggplot bar plot
-# ggplot(df_mode, aes(x = mode_choice, y = proportion)) +
-#   geom_bar(stat = "identity", position = "dodge") +
-#   labs(title = "Mode choice proportion", x = "Mode choice", y = "Proportion (%)")
+plot <- ggplot(df_mode, aes(x = mode_choice, y = proportion*100)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Mode choice proportion", x = "Mode choice", y = "Proportion (%)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels by 45 degrees
+
+# Save the plot as a PNG file
+png("plots/ODiN_mode.png", width = 800, height = 800, units = "px", res = 200)
+print(plot)
+dev.off()
 
 df_mode_comparison <- merge(df_mode, df_mode_sim, by='mode_choice')
 df_mode_comparison <- df_mode_comparison %>%
