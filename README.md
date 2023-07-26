@@ -7,7 +7,7 @@
 1.  [Description](#description)
 2.  [Data preparation](#1-data-preparation)
 3.  [Location assignment](#2-location-assignment)
-4.  [Analysis](analysis)
+4.  [Analysis](#analysis)
 5.  [Contributors](#contributors)
 6.  [License](#license)
 
